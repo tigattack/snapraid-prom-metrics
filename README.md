@@ -1,5 +1,8 @@
 # SnapRAID Prometheus Exporters
 
+> [!NOTE]
+> This is a fork of [zpeleg/snapraid-prom-metrics](https://github.com/zpeleg/snapraid-prom-metrics) with various fixes and improvements.
+
 A collection of Python scripts that export SnapRAID metrics for Prometheus monitoring via the node_exporter textfile collector mechanism. These exporters allow you to monitor your SnapRAID array's health, status, and changes over time.
 
 The scripts take the output of `snapraid status`, `snapraid smart`, and `snapraid diff` and convert them to node_exporter text files.
