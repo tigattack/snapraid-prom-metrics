@@ -144,8 +144,8 @@ def parse_snapraid_output(
 ) -> tuple[list[DiskMetrics], ArrayMetrics, ScrubMetrics, StatusMetrics]:
     """Parse snapraid status output into structured data."""
     lines = output.strip().split("\n")
-    disks = []
-    array_totals = None
+    disks: list[DiskMetrics] = []
+    array_totals: ArrayMetrics | None = None
 
     # Find the status table
     table_start = None
@@ -184,7 +184,7 @@ def generate_prometheus_metrics(
     status: StatusMetrics,
 ) -> str:
     """Generate Prometheus metrics in text format."""
-    metrics = []
+    metrics: list[str] = []
 
     # Per-disk metrics
     metrics.extend(

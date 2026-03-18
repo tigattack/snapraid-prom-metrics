@@ -81,7 +81,7 @@ def parse_snapraid_output(output: str) -> DiffMetrics:
 
 def generate_prometheus_metrics(metrics: DiffMetrics) -> str:
     """Generate Prometheus metrics in text format."""
-    output = []
+    output: list[str] = []
 
     # File count metrics
     output.extend(

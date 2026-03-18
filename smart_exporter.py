@@ -52,7 +52,7 @@ def get_snapraid_output() -> str:
 
 def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
     """Parse snapraid smart output and return list of disk metrics and array failure probability."""
-    disks = []
+    disks: list[DiskMetrics] = []
     array_failure_prob = 0.0
 
     # Skip header lines
@@ -109,7 +109,7 @@ def generate_prometheus_metrics(
     disks: list[DiskMetrics], array_failure_prob: float
 ) -> str:
     """Generate Prometheus metrics in text format."""
-    metrics = []
+    metrics: list[str] = []
 
     # Temperature metrics
     metrics.append(
