@@ -28,14 +28,15 @@ def get_snapraid_output() -> str:
             print(f"Error reading input file {input_file}: {e}")
             return ""
     else:
-        try:
-            result = subprocess.run(['sudo', 'snapraid', 'diff'],
-                                  capture_output=True,
-                                  text=True,
-                                  check=True)
+        result = subprocess.run(
+            ["sudo", "snapraid", "diff"], capture_output=True, text=True
+        )
+        # rc 0 and rc 2 are acceptable. rc 2 indicates sync required.
+        if result.returncode in (0, 2):
             return result.stdout
-        except subprocess.CalledProcessError as e:
-            print(f"Error running snapraid diff: {e}")
+        else:
+            print(f"Error running snapraid diff: return code {result.returncode}")
+            print(f"stderr: {result.stderr}")
             return ""
 
 def parse_diff_line(line: str, metrics: DiffMetrics) -> None:
