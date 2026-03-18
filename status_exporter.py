@@ -91,7 +91,7 @@ def parse_disk_line(line: str) -> DiskMetrics | None:
 def parse_array_totals(line: str) -> ArrayMetrics:
     """Parse the array totals line."""
     parts = line.strip().split()
-    if len(parts) >= 8:
+    if len(parts) >= 7:
         try:
             return ArrayMetrics(
                 total_files=int(parts[0]),
@@ -153,7 +153,7 @@ def parse_snapraid_output(
     for i, line in enumerate(lines):
         if "Files Fragmented" in line:
             table_start = i + 2
-        elif table_start and line.startswith("----"):
+        elif table_start and line.strip().startswith("----"):
             table_end = i
             break
 
