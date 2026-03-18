@@ -3,7 +3,6 @@ import subprocess
 import re
 import os
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional
 from dataclasses import dataclass
 
 @dataclass
@@ -61,7 +60,7 @@ def get_snapraid_output() -> str:
             print(f"Error running snapraid status: {e}")
             return ""
 
-def parse_disk_line(line: str) -> Optional[DiskMetrics]:
+def parse_disk_line(line: str) -> DiskMetrics | None:
     """Parse a single disk line from the status output."""
     parts = line.strip().split()
     if len(parts) == 8 and parts[-1] not in ['-', 'Name']:
@@ -126,7 +125,7 @@ def parse_status_flags(output: str) -> StatusMetrics:
         errors_detected="No error detected" not in output
     )
 
-def parse_snapraid_output(output: str) -> tuple[List[DiskMetrics], ArrayMetrics, ScrubMetrics, StatusMetrics]:
+def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], ArrayMetrics, ScrubMetrics, StatusMetrics]:
     """Parse snapraid status output into structured data."""
     lines = output.strip().split('\n')
     disks = []
@@ -162,7 +161,7 @@ def parse_snapraid_output(output: str) -> tuple[List[DiskMetrics], ArrayMetrics,
     return disks, array_totals, scrub_metrics, status_metrics
 
 def generate_prometheus_metrics(
-    disks: List[DiskMetrics],
+    disks: list[DiskMetrics],
     array: ArrayMetrics,
     scrub: ScrubMetrics,
     status: StatusMetrics

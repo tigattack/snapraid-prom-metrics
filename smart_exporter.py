@@ -2,7 +2,7 @@
 import subprocess
 import re
 from pathlib import Path
-from typing import Dict, List, NamedTuple
+from typing import NamedTuple
 
 class DiskMetrics(NamedTuple):
     temperature: int
@@ -32,7 +32,7 @@ def run_snapraid_smart() -> str:
         print(f"Error running snapraid smart: {e}")
         return ""
 
-def parse_snapraid_output(output: str) -> tuple[List[DiskMetrics], float]:
+def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
     """Parse snapraid smart output and return list of disk metrics and array failure probability."""
     disks = []
     array_failure_prob = 0.0
@@ -84,7 +84,7 @@ def parse_snapraid_output(output: str) -> tuple[List[DiskMetrics], float]:
     
     return disks, array_failure_prob
 
-def generate_prometheus_metrics(disks: List[DiskMetrics], array_failure_prob: float) -> str:
+def generate_prometheus_metrics(disks: list[DiskMetrics], array_failure_prob: float) -> str:
     """Generate Prometheus metrics in text format."""
     metrics = []
     
