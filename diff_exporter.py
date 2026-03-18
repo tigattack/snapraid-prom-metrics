@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import subprocess
-import re
+
 import os
-from pathlib import Path
+import re
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
+
 
 @dataclass
 class DiffMetrics:
@@ -16,13 +18,14 @@ class DiffMetrics:
     restored: int = 0
     has_differences: bool = False
 
+
 def get_snapraid_output() -> str:
     """Get snapraid diff output either from command or file."""
-    input_file = os.getenv('SNAPRAID_INPUT_FILE')
+    input_file = os.getenv("SNAPRAID_INPUT_FILE")
 
     if input_file:
         try:
-            with open(input_file, 'r') as f:
+            with open(input_file, "r") as f:
                 return f.read()
         except Exception as e:
             print(f"Error reading input file {input_file}: {e}")
@@ -39,19 +42,20 @@ def get_snapraid_output() -> str:
             print(f"stderr: {result.stderr}")
             return ""
 
+
 def parse_diff_line(line: str, metrics: DiffMetrics) -> None:
     """Parse a single line from the diff output."""
     line = line.strip()
 
     # Define patterns for each metric
     patterns = {
-        'equal': r'(\d+)\s+equal',
-        'added': r'(\d+)\s+added',
-        'removed': r'(\d+)\s+removed',
-        'updated': r'(\d+)\s+updated',
-        'moved': r'(\d+)\s+moved',
-        'copied': r'(\d+)\s+copied',
-        'restored': r'(\d+)\s+restored'
+        "equal": r"(\d+)\s+equal",
+        "added": r"(\d+)\s+added",
+        "removed": r"(\d+)\s+removed",
+        "updated": r"(\d+)\s+updated",
+        "moved": r"(\d+)\s+moved",
+        "copied": r"(\d+)\s+copied",
+        "restored": r"(\d+)\s+restored",
     }
 
     # Check each pattern
@@ -61,11 +65,12 @@ def parse_diff_line(line: str, metrics: DiffMetrics) -> None:
             value = int(match.group(1))
             setattr(metrics, metric_name, value)
 
+
 def parse_snapraid_output(output: str) -> DiffMetrics:
     """Parse snapraid diff output into structured data."""
     metrics = DiffMetrics()
 
-    for line in output.strip().split('\n'):
+    for line in output.strip().split("\n"):
         parse_diff_line(line, metrics)
 
     # Check if there are any differences
@@ -73,44 +78,50 @@ def parse_snapraid_output(output: str) -> DiffMetrics:
 
     return metrics
 
+
 def generate_prometheus_metrics(metrics: DiffMetrics) -> str:
     """Generate Prometheus metrics in text format."""
     output = []
 
     # File count metrics
-    output.extend([
-        "# HELP snapraid_diff_files_total Number of files in each state",
-        "# TYPE snapraid_diff_files_total gauge"
-    ])
+    output.extend(
+        [
+            "# HELP snapraid_diff_files_total Number of files in each state",
+            "# TYPE snapraid_diff_files_total gauge",
+        ]
+    )
 
     # Add metrics for each state
     states = {
-        'equal': 'Files unchanged since last sync',
-        'added': 'Files added since last sync',
-        'removed': 'Files removed since last sync',
-        'updated': 'Files updated since last sync',
-        'moved': 'Files moved since last sync',
-        'copied': 'Files copied since last sync',
-        'restored': 'Files restored since last sync'
+        "equal": "Files unchanged since last sync",
+        "added": "Files added since last sync",
+        "removed": "Files removed since last sync",
+        "updated": "Files updated since last sync",
+        "moved": "Files moved since last sync",
+        "copied": "Files copied since last sync",
+        "restored": "Files restored since last sync",
     }
 
-    for state, desc in states.items():
+    for state, _ in states.items():
         value = getattr(metrics, state)
         output.append(f'snapraid_diff_files_total{{state="{state}"}} {value}')
 
     # Status metric
-    output.extend([
-        "\n# HELP snapraid_diff_has_differences Whether there are any differences (0=no, 1=yes)",
-        "# TYPE snapraid_diff_has_differences gauge",
-        f"snapraid_diff_has_differences {int(metrics.has_differences)}"
-    ])
+    output.extend(
+        [
+            "\n# HELP snapraid_diff_has_differences Whether there are any differences (0=no, 1=yes)",
+            "# TYPE snapraid_diff_has_differences gauge",
+            f"snapraid_diff_has_differences {int(metrics.has_differences)}",
+        ]
+    )
 
     return "\n".join(output)
 
+
 def main():
     # Get output directory from environment variable or use default
-    output_dir = os.getenv('TEXTFILE_DIRECTORY', '/var/lib/prometheus/node_exporter')
-    output_path = Path(output_dir) / 'snapraid_diff.prom'
+    output_dir = os.getenv("TEXTFILE_DIRECTORY", "/var/lib/prometheus/node_exporter")
+    output_path = Path(output_dir) / "snapraid_diff.prom"
 
     # Get snapraid output
     snapraid_output = get_snapraid_output()
@@ -128,17 +139,18 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write temporary file and rename to ensure atomic writes
-    temp_path = output_path.with_suffix('.prom.tmp')
+    temp_path = output_path.with_suffix(".prom.tmp")
     try:
-        with open(temp_path, 'w') as f:
+        with open(temp_path, "w") as f:
             f.write(metrics)
-            f.write('\n')
+            f.write("\n")
         temp_path.rename(output_path)
         print(f"Successfully wrote metrics to {output_path}")
     except Exception as e:
         print(f"Error writing metrics file: {e}")
         if temp_path.exists():
             temp_path.unlink()
+
 
 if __name__ == "__main__":
     main()
