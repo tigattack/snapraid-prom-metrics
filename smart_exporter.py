@@ -68,28 +68,31 @@ def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
         parts = line.strip().split()
         if len(parts) >= 8:
             try:
+                name = parts[7]
+                device = parts[6]
+                serial = parts[5]
+
+                if name == "-" or device == "-" or serial == "-":
+                    continue
+
                 temp = int(parts[0]) if parts[0].isdigit() else 0
                 power_days = int(parts[1]) if parts[1].isdigit() else 0
                 error_count = int(parts[2]) if parts[2].isdigit() else 0
                 failure_prob = float(parts[3].rstrip("%")) if parts[3] != "-" else 0.0
                 size_tb = parse_size_tb(parts[4])
-                serial = parts[5]
-                device = parts[6]
-                name = parts[7]
 
-                if device != "-" and serial != "-":
-                    disks.append(
-                        DiskMetrics(
-                            temperature=temp,
-                            power_days=power_days,
-                            error_count=error_count,
-                            failure_prob=failure_prob,
-                            size_tb=size_tb,
-                            serial=serial,
-                            device=device,
-                            name=name,
-                        )
+                disks.append(
+                    DiskMetrics(
+                        temperature=temp,
+                        power_days=power_days,
+                        error_count=error_count,
+                        failure_prob=failure_prob,
+                        size_tb=size_tb,
+                        serial=serial,
+                        device=device,
+                        name=name,
                     )
+                )
             except (ValueError, IndexError) as e:
                 print(f"Error parsing line: {line}, Error: {e}")
                 continue
