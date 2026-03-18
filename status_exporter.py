@@ -227,11 +227,15 @@ def generate_prometheus_metrics(
     for disk in disks:
         used_bytes = int(disk.used_gb * 1e9)
         free_bytes = int(disk.free_gb * 1e9)
+        total_bytes = used_bytes + free_bytes
         metrics.append(
             f'snapraid_disk_space_bytes{{name="{disk.name}",type="used"}} {used_bytes}'
         )
         metrics.append(
             f'snapraid_disk_space_bytes{{name="{disk.name}",type="free"}} {free_bytes}'
+        )
+        metrics.append(
+            f'snapraid_disk_space_bytes{{name="{disk.name}",type="total"}} {total_bytes}'
         )
 
     # Array metrics
@@ -254,6 +258,9 @@ def generate_prometheus_metrics(
     total_free_bytes = int(array.total_free_gb * 1e9)
     metrics.append(f'snapraid_array_space_bytes{{type="used"}} {total_used_bytes}')
     metrics.append(f'snapraid_array_space_bytes{{type="free"}} {total_free_bytes}')
+    metrics.append(
+        f'snapraid_array_space_bytes{{type="total"}} {total_used_bytes + total_free_bytes}'
+    )
 
     # Scrub metrics
     metrics.extend(
