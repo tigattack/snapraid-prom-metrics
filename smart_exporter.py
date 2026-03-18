@@ -25,16 +25,29 @@ def parse_size_tb(size_str: str) -> float:
     return float(size_str)
 
 
-def run_snapraid_smart() -> str:
-    """Run snapraid smart command and return output."""
-    try:
-        result = subprocess.run(
-            ["sudo", "snapraid", "smart"], capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"Error running snapraid smart: {e}")
-        return ""
+def get_snapraid_output() -> str:
+    """Get snapraid smart output either from command or file."""
+    input_file = os.getenv("SNAPRAID_INPUT_FILE")
+
+    if input_file:
+        try:
+            with open(input_file, "r") as f:
+                return f.read()
+        except Exception as e:
+            print(f"Error reading input file {input_file}: {e}")
+            return ""
+    else:
+        try:
+            result = subprocess.run(
+                ["sudo", "snapraid", "smart"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            print(f"Error running snapraid smart: {e}")
+            return ""
 
 
 def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
@@ -165,7 +178,7 @@ def main():
     output_path = Path(output_dir) / "snapraid_smart.prom"
 
     # Run snapraid smart and get output
-    snapraid_output = run_snapraid_smart()
+    snapraid_output = get_snapraid_output()
     if not snapraid_output:
         print("No output from snapraid smart command")
         return
