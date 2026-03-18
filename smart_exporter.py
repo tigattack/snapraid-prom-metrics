@@ -53,6 +53,7 @@ def get_snapraid_output() -> str:
 def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
     """Parse snapraid smart output and return list of disk metrics and array failure probability."""
     disks: list[DiskMetrics] = []
+    seen_serials: set[str] = set()
     array_failure_prob = 0.0
 
     # Skip header lines
@@ -74,6 +75,9 @@ def parse_snapraid_output(output: str) -> tuple[list[DiskMetrics], float]:
 
                 if name == "-" or device == "-" or serial == "-":
                     continue
+                if serial in seen_serials:
+                    continue
+                seen_serials.add(serial)
 
                 temp = int(parts[0]) if parts[0].isdigit() else 0
                 power_days = int(parts[1]) if parts[1].isdigit() else 0
